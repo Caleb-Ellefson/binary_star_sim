@@ -16,16 +16,19 @@ This project is developed using a **MinGW-w64** (GCC) toolchain rather than the 
 
 ### Windows
 Ensure your MSYS2 `bin` folder is in your system **PATH**. Use the following commands in your terminal:
-```bash
+```
 mkdir build
 cd build
 # Point glfw3_DIR to your local GLFW config folder
 cmake -G "MinGW Makefiles" -Dglfw3_DIR="C:/Path/To/GLFW/lib/cmake/glfw3" ..
 mingw32-make
+```
 
 #### Linux
 
-`mkdir build`  
-`cd build`  
-`cmake ..`  
-`cmake --build .`  
+```
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
