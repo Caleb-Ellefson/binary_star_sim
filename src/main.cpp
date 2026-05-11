@@ -1,23 +1,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <vector>
+#include <glm/glm/vec3.hpp>
+#include <glm/glm/glm.hpp>
+using namespace std;
 
 #define WIDTH 640
 #define HEIGHT 480
-
-float vertices[] = {
-    // First triangle
-     0.5f,  0.5f, 0.0f,  // top right
-     0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f,  0.5f, 0.0f,  // top left 
-};
-
-float vertices1[] = {
-    // Second triangle
-     0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left
-};
 
 // Vertex Shader source code
 const char *vertexShaderSource = "#version 330 core\n"
@@ -34,6 +24,43 @@ const char *fragmentShaderSource = "#version 330 core\n"
 "{\n"
     "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 "}\0";
+
+std::vector<glm::vec3> vertices;
+
+std::vector<unsigned int> indices;
+
+// object id variables
+unsigned int vertexBuffer;
+unsigned int vertexArray;
+
+unsigned int elementBuffer;
+
+void buildCircle(float radius, int vCount)
+{
+    float angle = 360.0f / vCount;
+
+    int triangleCount = vCount - 2;
+
+    std::vector<glm::vec3> temp;
+    // positions
+    for (int i = 0; i < vCount; i++)
+    {
+        float currentAngle = angle * i;
+        float x = radius * cos(glm::radians(currentAngle));
+        float y = radius * sin(glm::radians(currentAngle));
+        float z = 0.0f;
+
+        vertices.push_back(glm::vec3(x, y, z));
+    }
+
+    // push indexes of each triangle points
+    for (int i = 0; i < triangleCount; i++)
+    {
+        indices.push_back(0);
+        indices.push_back(i + 1);
+        indices.push_back(i + 2);
+    }
+}
 
 int main () {
     if (!glfwInit()) {
@@ -56,38 +83,23 @@ int main () {
         return -1;
     }
 
-    unsigned int VAO;
-    // Generate vertex
+    buildCircle(0.25f, 128); 
+
+    unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
-    // Bind it 
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
     glBindVertexArray(VAO);
 
-    // Create Vertex buffer object
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    // Bind buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // Copy our data into the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // Create Second VBO & VAO
-    unsigned int VAO1;
-    glGenVertexArrays(1, &VAO1);
-    glBindVertexArray(VAO1);
-
-    // Create Vertex buffer object
-    unsigned int VBO1;
-    glGenBuffers(1, &VBO1);
-    // Bind buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-    // Copy our data into the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // Enable the vertex attributes
-    glEnableVertexAttribArray(0);
-
 
     // Vertex Shader
     unsigned int vertexShader;
@@ -147,12 +159,9 @@ int main () {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
-        // Draw triangle 1
+
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        // Drawe Triangle 2
-        glBindVertexArray(VAO1);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
     }
