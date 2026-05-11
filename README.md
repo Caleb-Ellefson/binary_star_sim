@@ -2,7 +2,7 @@
 
 A real-time simulation of binary star systems using C++ and OpenGL.
 
-## Building
+## Building From Source
 
 ### Dependencies
 * **C++ Compiler**: GCC 15.2.0 or higher (via MSYS2 MinGW-w64).
